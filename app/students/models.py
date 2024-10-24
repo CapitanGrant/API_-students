@@ -31,6 +31,21 @@ class Student(Base):
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "phone_number": self.phone_number,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "date_of_birth": self.date_of_birth,
+            "email": self.email,
+            "address": self.address,
+            "enrollment_year": self.enrollment_year,
+            "course": self.course,
+            "special_notes": self.special_notes,
+            "major_id": self.major_id
+        }
+
 
 # создаем модель таблицы факультетов (majors)
 class Major(Base):
