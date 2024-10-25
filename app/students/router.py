@@ -24,3 +24,18 @@ async def get_students_by_filter(request_body: RBStudent = Depends()) -> SStuden
         return {'message': f'Студент с указанными вами параметрами не найден!'}
     return rez
 
+@router.post("/add/")
+async def add_student(student: SStudent) -> dict:
+    check = await StudentDAO.add_student(**student.dict())
+    if check:
+        return {"message": "Студент успешно добавлен!", "student": student}
+    else:
+        return {"message": "Ошибка при добавлении студента!"}
+
+@router.delete("/delete/{student_id}")
+async def delete_student_by_id(student_id: int) -> dict:
+    check = await StudentDAO.delete_student_by_id(student_id=student_id)
+    if check:
+        return {"message": f"Студент с ID {student_id} удален!"}
+    else:
+        return {"message": "Ошибка при удалении студента!"}
