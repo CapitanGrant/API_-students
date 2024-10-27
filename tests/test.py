@@ -20,5 +20,6 @@ async def add_major(major_name: str, major_description: str):
 
 
 # вызов функции
-response = asyncio.run(add_major(major_name='Высшая математика', major_description='Учим решать математические формулы'))
+response = asyncio.run(
+    add_major(major_name='Высшая математика', major_description='Учим решать математические формулы'))
 print(response)
