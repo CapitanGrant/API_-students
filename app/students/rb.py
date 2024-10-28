@@ -9,7 +9,9 @@ class RBStudent:
         self.enrollment_year = enrollment_year
 
     def to_dict(self) -> dict:
-        data = {'id': self.id, 'course': self.course, 'major_id': self.major_id,
-                'enrollment_year': self.enrollment_year}
-        filtred_data = {key: value for key, value in data.items() if value is not None}
-        return filtred_data
+        return {key: value for key, value in {
+            'id': self.id,
+            'course': self.course,
+            'major_id': self.major_id,
+            'enrollment_year': self.enrollment_year
+        }.items() if value is not None}

@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+
+from app.referal.dao import ReferralDAO, ReferralCodeDAO
 from app.users.auth import get_password_hash, authenticate_user, create_access_token
 from app.users.dao import UsersDAO
 from app.users.dependencies import get_current_user, get_current_admin_user
@@ -17,11 +19,29 @@ async def register_user(user_data: SUserRegister) -> dict:
             status_code=status.HTTP_409_CONFLICT,
             detail="Пользователь не существует"
         )
-    user_dict = user_data.dict()
-    user_dict["password"] = get_password_hash(user_data.password)
-    await UsersDAO.add(**user_dict)
+    user = await UsersDAO.find_one_or_none(phone_number=user_data.phone_number)
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Пользователь с таким номером телефона уже существует"
+        )
+    # Проверяем, существует ли реферальный код
+    if user_data.code:
+        referral_code = await ReferralCodeDAO.find_code(user_data.code)
+        if not referral_code:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Реферальный код не найден")
+        user_dict = user_data.dict()
+        user_dict["password"] = get_password_hash(user_data.password)
+        new_user = await UsersDAO.add(**user_dict)
+        await ReferralDAO.add(referral_code_id=referral_code.id,
+                              referral_id=new_user.id,
+                              referrer_id=referral_code.user_id)
+    else:
+        user_dict = user_data.dict()
+        user_dict["password"] = get_password_hash(user_data.password)
+        await UsersDAO.add(**user_dict)
     return {'message': 'Вы успешно зарегистрированы!'}
-
 @router.post("/login/")
 async def auth_user(response: Response, user_data: SUserAuth):
     check = await authenticate_user(email=user_data.email, password=user_data.password)
