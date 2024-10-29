@@ -5,10 +5,10 @@ from app.users.dao import UsersDAO
 from app.users.dependencies import get_current_user
 from app.users.models import User
 
-router = APIRouter(prefix="/referral", tags=["Ref"])
+router = APIRouter(prefix="/referral", tags=["Работа с реферальной системой"])
 
 
-@router.get("/get_referral_code/{email}")
+@router.get("/get_referral_code/{email}", summary="Получить реферальный код, зная email адрес реферера")
 async def get_referral_code(email: str):
     referral_code = await UsersDAO.get_referral_code_by_email(email)
     if referral_code:
@@ -17,7 +17,7 @@ async def get_referral_code(email: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Реферальный код не найден.")
 
 
-@router.get("/all_referral/{referrer_id}")
+@router.get("/all_referral/{referrer_id}", summary="Получить всех рефералов, реферера")
 async def get_all_referral_code(referrer_id: int):
     referrals = await ReferralDAO.get_referrals_by_referrer_id(referrer_id)
     if referrals:
@@ -26,9 +26,9 @@ async def get_all_referral_code(referrer_id: int):
         return {"message": "У данного пользователя нет рефералов!"}
 
 
-@router.post("/create/")
+@router.post("/create/", summary="Создать реферальный код")
 async def create_referral_code(reference_code: SReferralCodeAdd,
-                               current_user: User = Depends(get_current_user)) -> dict:
+                               current_user: User = Depends(get_current_user), summary="Создать реферальный код") -> dict:
     user_id = current_user.id
     if reference_code.user_id != user_id:
         return {"message": "Вы не можете создавать код для другого пользователя."}
@@ -45,7 +45,7 @@ async def create_referral_code(reference_code: SReferralCodeAdd,
         return {"message": "Ошибка при добавлении кода!"}
 
 
-@router.delete("/delete/{code_id}")
+@router.delete("/delete/{code_id}", summary="Удалить реферальный код по ID")
 async def delete_referral_code(code_id: int, current_user: User = Depends(get_current_user)) -> dict:
     check = await ReferralCodeDAO.delete_code_by_id(code_id=code_id)
     if check:
